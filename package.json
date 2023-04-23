@@ -1,6 +1,6 @@
 {
   "name": "@ali/vite-framework",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "files": [
     "dist"
@@ -37,5 +37,8 @@
   },
   "peerDependencies": {
     "vite": "^4.2.0"
+  },
+  "publishConfig": {
+    "registry": "https://registry.npm.alibaba-inc.com"
   }
 }
