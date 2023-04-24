@@ -54,7 +54,7 @@ function Redirect({ to }: { to: string }) {
 const routes: RouteObject[] = ${JSON.stringify(result, null, 2)};
 export default routes;      
       `;
-      code = code.replace(/"(<.*? \/>)"/g, "$1");
+      code = code.replace(/"(<.*?>)"/g, "$1");
 
       fs.writeFileSync(path.join(pagesDir, "routes.tsx"), code, "utf-8");
 
@@ -85,9 +85,9 @@ function parseFile(filePath, callback) {
 /**
  * 生成路由配置
  * @param filePath 路由文件目录
- * @param config 路由配置
- * @param declaration 声明路由组件
- * @param comment 路由注释信息
+ * @param config 路由配置结果
+ * @param declarations 声明路由组件结果
+ * @param comment 路由注释信息结果
  */
 async function createRoute(filePath, config, declarations, comment) {
   try {
@@ -124,6 +124,19 @@ async function createRoute(filePath, config, declarations, comment) {
           key: componentName,
           value: `React.lazy(() => import("./${relativePath}"))`,
         });
+        if (filePaths.includes("guard.tsx")) {
+          let guardName = "";
+          parseFile(path.join(filePath, "guard.tsx"), (node) => {
+            if (node.type === "ExportDefaultDeclaration") {
+              guardName = node.declaration?.name || node.declaration?.id?.name;
+            }
+          });
+          declarations.push({
+            key: guardName,
+            value: `React.lazy(() => import("./${relativePath}/guard"))`,
+          });
+          route.element = `<${guardName}><${componentName} /></${guardName}>`;
+        }
       }
       for await (const item of filePaths) {
         const itemFilePath = path.join(filePath, item);
