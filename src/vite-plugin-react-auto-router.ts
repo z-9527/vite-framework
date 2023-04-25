@@ -37,6 +37,7 @@ export function autoRouter(opts: Options = { auto: true }): Plugin {
 import React, { useEffect } from "react";
 import { RouteObject, useNavigate } from "react-router-dom";
 
+const Loading = () => <>...</>;
 
 function Redirect({ to }: { to: string }) {
   const navigate = useNavigate();
@@ -118,12 +119,7 @@ async function createRoute(filePath, config, declarations, comment) {
           }
         });
         route.path = "/" + relativePath;
-        route.element = `<${componentName} />`;
-        config.push(route);
-        declarations.push({
-          key: componentName,
-          value: `React.lazy(() => import("./${relativePath}"))`,
-        });
+        route.element = `<React.Suspense fallback={<Loading />}><${componentName} /></React.Suspense>`;
         if (filePaths.includes("guard.tsx")) {
           let guardName = "";
           parseFile(path.join(filePath, "guard.tsx"), (node) => {
@@ -135,8 +131,15 @@ async function createRoute(filePath, config, declarations, comment) {
             key: guardName,
             value: `React.lazy(() => import("./${relativePath}/guard"))`,
           });
-          route.element = `<${guardName}><${componentName} /></${guardName}>`;
+          route.element = `<React.Suspense fallback={<Loading />}><${guardName}><${componentName} /></${guardName}></React.Suspense>`;
         }
+        route.path = route.path.replace(/\/404/g, "/*");
+
+        config.push(route);
+        declarations.push({
+          key: componentName,
+          value: `React.lazy(() => import("./${relativePath}"))`,
+        });
       }
       for await (const item of filePaths) {
         const itemFilePath = path.join(filePath, item);
