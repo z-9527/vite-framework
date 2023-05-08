@@ -1,6 +1,6 @@
 {
   "name": "@ali/vite-framework",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "",
   "files": [
     "dist"
@@ -27,11 +27,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@babel/core": "^7.21.4",
-    "body-parser": "^1.20.2"
+    "@babel/core": "^7.21.4"
   },
   "devDependencies": {
-    "@types/body-parser": "^1.19.2",
     "@types/node": "^18.15.13",
     "unbuild": "^1.2.1"
   },

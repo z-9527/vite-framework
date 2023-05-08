@@ -3,7 +3,6 @@ import type { Plugin } from "vite";
 import path from "path";
 import fs from "fs";
 import url from "url";
-import bodyParser from "body-parser";
 
 const rootDir = process.cwd();
 
@@ -85,10 +84,6 @@ export function mockServer(opts: Options = { mock: true }): Plugin {
     name: "mock-server",
     async configureServer(server) {
       if (opts.mock) {
-        // parse application/x-www-form-urlencoded
-        server.middlewares.use(bodyParser.urlencoded({ extended: false }));
-        // parse application/json
-        server.middlewares.use(bodyParser.json());
 
         server.middlewares.use(async function (req, res, next) {
           const apiMap = {};
