@@ -35,10 +35,16 @@ export function autoRouter(opts: Options = { auto: true }): Plugin {
  * vite插件自动生成，请勿修改
  */
 import React, { useEffect } from "react";
-import { RouteObject, useNavigate } from "react-router-dom";
+import { RouteObject, useNavigate } from "react-router-dom";`;
+      if (fs.existsSync(path.join(pagesDir, "page-loading.tsx"))) {
+        code += `
+import Loading from "./page-loading";`;
+      } else {
+        code += `
+const Loading = () => <>...</>;`;
+      }
 
-const Loading = () => <>...</>;
-
+      code += `
 function Redirect({ to }: { to: string }) {
   const navigate = useNavigate();
   useEffect(() => {
@@ -46,8 +52,8 @@ function Redirect({ to }: { to: string }) {
   });
   return null;
 }
-
 `;
+
       declarations.forEach((item) => {
         code += `const ${item.key} = ${item.value}; \n`;
       });
