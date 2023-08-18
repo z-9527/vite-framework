@@ -92,24 +92,22 @@ function parseFile(filePath, callback) {
 //解析页面头部注释
 function parsePageComments(node, filePath) {
   const obj = {};
-  if (node.type === "ImportDeclaration" && node.leadingComments) {
-    let comments = node.leadingComments[0].value?.match(/(?<=@).*/g) || [];
+  let comments = node.leadingComments[0].value?.match(/(?<=@).*/g) || [];
 
-    comments.forEach((item) => {
-      const arr = item.trim().split(/\s+/);
-      let [key, value] = arr;
-      if (key === "data") {
-        try {
-          value = JSON.parse(value);
-        } catch (error) {
-          console.log(
-            `error: 路由data解析失败，请确认@data值是否为JSON对象\n文件目录：${filePath}`
-          );
-        }
+  comments.forEach((item) => {
+    const arr = item.trim().split(/\s+/);
+    let [key, value] = arr;
+    if (key === "data") {
+      try {
+        value = JSON.parse(value);
+      } catch (error) {
+        console.log(
+          `error: 路由data解析失败，请确认@data值是否为JSON对象\n文件目录：${filePath}`
+        );
       }
-      obj[key] = value;
-    });
-  }
+    }
+    obj[key] = value;
+  });
   return obj;
 }
 
@@ -142,10 +140,12 @@ async function createRoute(filePath, config, declarations, comment) {
             componentName =
               node.declaration?.name || node.declaration?.id?.name;
           }
-          routeComment = parsePageComments(
-            node,
-            `/pages/${relativePath}/index.tsx`
-          );
+          if (node.type === "ImportDeclaration" && node.leadingComments) {
+            routeComment = parsePageComments(
+              node,
+              `/pages/${relativePath}/index.tsx`
+            );
+          }
           if (routeComment.name) {
             route.name = routeComment.name;
           }
@@ -158,6 +158,9 @@ async function createRoute(filePath, config, declarations, comment) {
           }
         });
         route.path = "/" + relativePath;
+        if (routeComment?.childrenRouter) {
+          route.path += "/*";
+        }
         route.element = `<React.Suspense fallback={<Loading />}><${componentName} /></React.Suspense>`;
         if (filePaths.includes("guard.tsx")) {
           let guardName = "";
