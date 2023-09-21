@@ -36,18 +36,33 @@ async function getFilesSync(filePath, result) {
  * @param res
  */
 function createContext(req, res) {
-  Object.assign(req, {
-    query: url.parse(req.url, true).query,
-  });
-  Object.assign(res, {
-    status(code) {
-      this.statusCode = code;
-      return this;
-    },
-    json(obj) {
-      res.setHeader("Content-Type", "application/json");
-      res.end(JSON.stringify(obj));
-    },
+  return new Promise((resolve) => {
+    Object.assign(req, {
+      query: url.parse(req.url, true).query,
+    });
+    Object.assign(res, {
+      status(code) {
+        this.statusCode = code;
+        return this;
+      },
+      json(obj) {
+        res.setHeader("Content-Type", "application/json");
+        res.end(JSON.stringify(obj));
+      },
+    });
+    if (req.method.toLowerCase() === "post") {
+      let data = "";
+      req.on("data", function (chunk) {
+        data += chunk;
+      });
+
+      req.on("end", function () {
+        req.body = JSON.parse(data);
+        resolve();
+      });
+    } else {
+      resolve();
+    }
   });
 }
 
@@ -61,8 +76,9 @@ function proxyApi(apiMap, req, res, next) {
     if (_method === method && api === baseUrl) {
       if (typeof handle === "function") {
         // 可以参照koa或者express的方法封装一下res,这样外面在使用时更方便
-        createContext(req, res);
-        handle(req, res);
+        createContext(req, res).then(() => {
+          handle(req, res);
+        });
       } else {
         res.writeHead(200, {
           "Content-Type": "application/json",
@@ -84,7 +100,6 @@ export function mockServer(opts: Options = { mock: true }): Plugin {
     name: "mock-server",
     async configureServer(server) {
       if (opts.mock) {
-
         server.middlewares.use(async function (req, res, next) {
           const apiMap = {};
           await getFilesSync(path.join(rootDir, "mock"), apiMap);
