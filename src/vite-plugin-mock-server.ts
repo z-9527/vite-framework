@@ -57,7 +57,7 @@ function createContext(req, res) {
       });
 
       req.on("end", function () {
-        req.body = JSON.parse(data);
+        req.body = data ? JSON.parse(data) : {};
         resolve();
       });
     } else {

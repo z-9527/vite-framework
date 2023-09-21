@@ -1,6 +1,6 @@
 {
   "name": "@ali/vite-framework",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "",
   "files": [
@@ -38,6 +38,6 @@
     "vite": "^4.2.0"
   },
   "publishConfig": {
-    "registry": "https://registry.npm.alibaba-inc.com"
+    "registry": "https://registry.anpm.alibaba-inc.com"
   }
 }
