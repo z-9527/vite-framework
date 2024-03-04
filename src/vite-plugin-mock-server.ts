@@ -57,7 +57,29 @@ function createContext(req, res) {
       });
 
       req.on("end", function () {
-        req.body = data ? JSON.parse(data) : {};
+        const contentType = req.headers["content-type"];
+        if (contentType.includes("multipart/form-data")) {
+          const boundary =
+            "--" + contentType.match(/(?<=boundary=).*.*\b/)?.[0];
+          const body = {};
+          data?.split(boundary)?.forEach((item) => {
+            if (item.includes("name=")) {
+              const name = item.match(/(?<= name=").*\b/)?.[0];
+              const value = item
+                .split("\n")
+                ?.filter((i) => i)
+                ?.at(-1);
+              body[name] = value?.replace(/\r$/,'');
+            }
+          });
+          req.body = body;
+        } else {
+          try {
+            req.body = JSON.parse(data);
+          } catch (error) {
+            req.body = {};
+          }
+        }
         resolve();
       });
     } else {
