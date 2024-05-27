@@ -58,7 +58,7 @@ function createContext(req, res) {
 
       req.on("end", function () {
         const contentType = req.headers["content-type"];
-        if (contentType.includes("multipart/form-data")) {
+        if (contentType?.includes("multipart/form-data")) {
           const boundary =
             "--" + contentType.match(/(?<=boundary=).*.*\b/)?.[0];
           const body = {};
