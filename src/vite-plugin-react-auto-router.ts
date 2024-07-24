@@ -158,6 +158,13 @@ async function createRoute(filePath, config, declarations, comment) {
           }
         });
         route.path = "/" + relativePath;
+        // 动态路由参数(仅支持在末尾)，多个参数用【,】或者【/】分隔
+        // @pathParams projectId,userId
+        // 生成路径：/currentPath/:projectId/:userId
+        if (routeComment?.pathParams) {
+          const pathParams = routeComment.pathParams.split(/[,\/]/);
+          route.path += `/:${pathParams.join("/:")}`;
+        }
         if (routeComment?.childrenRouter) {
           route.path += "/*";
         }
